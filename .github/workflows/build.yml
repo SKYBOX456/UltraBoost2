@@ -4,14 +4,17 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'UltraBoost-Forge-1.20.1-source.zip'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'src/**'
       - '.github/workflows/build.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -25,18 +28,12 @@ jobs:
         with:
           gradle-version: '8.1.1'
 
-      - name: Extract project
-        run: |
-          unzip -q UltraBoost-Forge-1.20.1-source.zip -d extracted
-          PROJECT_DIR="$(find extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-
       - name: Build mod
-        run: gradle -p "$PROJECT_DIR" build --no-daemon
+        run: gradle build --no-daemon
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: UltraBoost-Forge-1.20.1
-          path: ${{ env.PROJECT_DIR }}/build/libs/*.jar
+          path: build/libs/*.jar
           if-no-files-found: error
